@@ -21,6 +21,15 @@
         width: 100%;
         height: 100vh;
     }
+
+    .mapboxgl-popup-content {
+        font-family: Arial, sans-serif;
+        padding: 12px;
+    }
+
+    .mapboxgl-popup-content h3 {
+        margin: 0 0 8px 0;
+    }
 </style>
 ```
 
@@ -31,7 +40,7 @@
 
 ```
 <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZXN3YW5zb24yIiwiYSI6ImNtcHlhYno1eTA0OXYydG9nODFvbHl6emoifQ.FeQwaHgzy1xFT9GSTEV9hQ' ;
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZXN3YW5zb24yIiwiYSI6ImNtcHlhYno1eTA0OXYydG9nODFvbHl6emoifQ.FeQwaHgzy1xFT9GSTEV9hQ';
 
     const map = new mapboxgl.Map({
         container: 'map',
@@ -41,6 +50,42 @@
     });
 
     map.addControl(new mapboxgl.NavigationControl());
+
+    const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
+    map.on('load', () => {
+
+        map.on('mouseenter', 'Market Text', (e) => {
+
+            const feature = e.features[0];
+
+            if (feature.properties.name !== 'Muskegon') return;
+
+            map.getCanvas().style.cursor = 'pointer';
+
+            popup
+                .setLngLat(e.lngLat)
+                .setHTML(`
+                    <h3>Muskegon</h3>
+                    <p>This is Muskegon.</p>
+                    <a href="https://www.google.com/search?q=Muskegon+Michigan"
+                       target="_blank">
+                       Learn More About Muskegon
+                    </a>
+                `)
+                .addTo(map);
+
+        });
+
+        map.on('mouseleave', 'Market Text', () => {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+    });
 </script>
 ```
 
