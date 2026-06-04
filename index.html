@@ -52,38 +52,60 @@
     map.addControl(new mapboxgl.NavigationControl());
 
     const popup = new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false
-    });
+      closeButton: true,
+closeOnClick: false
+});
 
-    map.on('load', () => {
+let popupPinned = false;
 
-        map.on('mouseenter', 'Market Text', (e) => {
+const popupHTML = <h3>Muskegon</h3> <p>This is Muskegon.</p> <a href="https://www.google.com/search?q=Muskegon+Michigan" target="_blank"> Learn More About Muskegon </a>;
 
-            const feature = e.features[0];
+map.on('load', () => {
 
-            if (feature.properties.name !== 'Muskegon') return;
+map.on('mouseenter', 'Market Text', (e) => {
 
-            map.getCanvas().style.cursor = 'pointer';
+    const feature = e.features[0];
 
-            popup
-                .setLngLat(e.lngLat)
-                .setHTML(`
-                    <h3>Muskegon</h3>
-                    <p>This is Muskegon.</p>
-                    <a href="https://www.google.com/search?q=Muskegon+Michigan"
-                       target="_blank">
-                       Learn More About Muskegon
-                    </a>
-                `)
-                .addTo(map);
+    if (feature.properties.name !== 'Muskegon') return;
+    if (popupPinned) return;
 
-        });
+    map.getCanvas().style.cursor = 'pointer';
 
-        map.on('mouseleave', 'Market Text', () => {
-            map.getCanvas().style.cursor = '';
-            popup.remove();
-        });
+    popup
+        .setLngLat(e.lngLat)
+        .setHTML(popupHTML)
+        .addTo(map);
+
+});
+
+map.on('mouseleave', 'Market Text', () => {
+
+    map.getCanvas().style.cursor = '';
+
+    if (!popupPinned) {
+        popup.remove();
+    }
+
+});
+
+map.on('click', 'Market Text', (e) => {
+
+    const feature = e.features[0];
+
+    if (feature.properties.name !== 'Muskegon') return;
+
+    popupPinned = true;
+
+    popup
+        .setLngLat(e.lngLat)
+        .setHTML(popupHTML)
+        .addTo(map);
+
+});
+
+popup.on('close', () => {
+    popupPinned = false;
+});
 
     });
 </script>
