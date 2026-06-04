@@ -35,74 +35,78 @@
     <div id="map"></div>
 
     <script>
-        mapboxgl.accessToken = 'pk.eyJ1IjoiZXN3YW5zb24yIiwiYSI6ImNtcHlhYno1eTA0OXYydG9nODFvbHl6emoifQ.FeQwaHgzy1xFT9GSTEV9hQ';
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZXN3YW5zb24yIiwiYSI6ImNtcHlhYno1eTA0OXYydG9nODFvbHl6emoifQ.FeQwaHgzy1xFT9GSTEV9hQ';
 
-        const map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/eswanson2/cmpyahiy4000y01s1eq1yftfp',
-            center: [-85.3325, 42.4823],
-            zoom: 8.02
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/eswanson2/cmpyahiy4000y01s1eq1yftfp',
+        center: [-85.3325, 42.4823],
+        zoom: 8.02
+    });
+
+    map.addControl(new mapboxgl.NavigationControl());
+
+    const hoverPopup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
+    let pinnedPopup = null;
+
+    const popupHTML = `
+        <h3>Muskegon</h3>
+        <p>This is Muskegon.</p>
+        <a href="https://www.google.com/search?q=Muskegon+Michigan" target="_blank">
+            Learn More About Muskegon
+        </a>
+    `;
+
+    map.on('load', () => {
+
+        map.on('mouseenter', 'Market Text', (e) => {
+            const feature = e.features[0];
+
+            if (feature.properties.name !== 'Muskegon') return;
+            if (pinnedPopup) return;
+
+            map.getCanvas().style.cursor = 'pointer';
+
+            hoverPopup
+                .setLngLat(e.lngLat)
+                .setHTML(popupHTML)
+                .addTo(map);
         });
 
-        map.addControl(new mapboxgl.NavigationControl());
-
-        const popup = new mapboxgl.Popup({
-            closeButton: true,
-            closeOnClick: false
+        map.on('mouseleave', 'Market Text', () => {
+            map.getCanvas().style.cursor = '';
+            hoverPopup.remove();
         });
 
-        let popupPinned = false;
+        map.on('click', 'Market Text', (e) => {
+            const feature = e.features[0];
 
-        const popupHTML = `
-            <h3>Muskegon</h3>
-            <p>This is Muskegon.</p>
-            <a href="https://www.google.com/search?q=Muskegon+Michigan" target="_blank">
-                Learn More About Muskegon
-            </a>
-        `;
+            if (feature.properties.name !== 'Muskegon') return;
 
-        map.on('load', () => {
+            hoverPopup.remove();
 
-            map.on('mouseenter', 'Market Text', (e) => {
-                const feature = e.features[0];
+            if (pinnedPopup) {
+                pinnedPopup.remove();
+            }
 
-                if (feature.properties.name !== 'Muskegon') return;
-                if (popupPinned) return;
+            pinnedPopup = new mapboxgl.Popup({
+                closeButton: true,
+                closeOnClick: false
+            })
+                .setLngLat(e.lngLat)
+                .setHTML(popupHTML)
+                .addTo(map);
 
-                map.getCanvas().style.cursor = 'pointer';
-
-                popup
-                    .setLngLat(e.lngLat)
-                    .setHTML(popupHTML)
-                    .addTo(map);
+            pinnedPopup.on('close', () => {
+                pinnedPopup = null;
             });
-
-            map.on('mouseleave', 'Market Text', () => {
-                map.getCanvas().style.cursor = '';
-
-                if (!popupPinned) {
-                    popup.remove();
-                }
-            });
-
-            map.on('click', 'Market Text', (e) => {
-                const feature = e.features[0];
-
-                if (feature.properties.name !== 'Muskegon') return;
-
-                popupPinned = true;
-
-                popup
-                    .setLngLat(e.lngLat)
-                    .setHTML(popupHTML)
-                    .addTo(map);
-            });
-
-            popup.on('close', () => {
-                popupPinned = false;
-            });
-
         });
-    </script>
+
+    });
+</script>
 </body>
 </html>
